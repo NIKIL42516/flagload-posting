@@ -180,7 +180,7 @@ def getData():
     csvName = units[unitId]+"incidenttags.csv"
     pd.DataFrame(ctags,columns=["dataTagId"]).to_csv(csvName)
     loadtagsmap = mapLtags(ctags,tags)
-    return loadtagsmap,c_tags,tags
+    return loadtagsmap,ctags,tags
 
 
 for unitId in units:
