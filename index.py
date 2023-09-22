@@ -182,7 +182,41 @@ def getData():
     loadtagsmap = mapLtags(ctags,tags)
     return loadtagsmap,ctags,tags
 
-
+def calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup):
+        data1 = getValues(url=kairosUrl, tag=dataTagId)
+        data2 = getValues(url=kairosUrl,tag =loadtag)
+        df = data1.merge(data2, on='date', how='left')
+        df = df.drop_duplicates(subset='date')
+        df.fillna(method='ffill',inplace=True)
+        df.reset_index(drop=True, inplace=True)
+        if dataTagId==loadtag:
+            df=df
+        else:
+            df = df[df[loadtag] > 0]
+        df['bucket']=None
+        df['bucket'] = df[loadtag] // bucketSize * bucketSize
+        df = df.dropna()
+        df['loadLw']=None
+        df['loadUp']=None
+        if len(df)==0:
+            return
+        for i , row in dfGroup.iterrows():
+            #print("in")
+            df.loc[df[df['bucket'] ==row['bucket']].index,"loadUp"] = row['oldUpper']
+            df.loc[df[df['bucket'] ==row['bucket']].index,"loadLw"] = row['oldLower']
+        df.dropna(inplace=True)
+        #print(df)
+        try:
+            start_epoch = df['date'].iloc[0].astype(float)
+            end_epoch = df['date'].iloc[-1].astype(float)
+        except Exception as ex:
+            print(ex)
+            return
+        #print(type(start_epoch),type(end_epoch))
+        sublistUp = createSublist(df,"loadUp")
+        postDataApi("loadUp_"+dataTagId,sublistUp,start_epoch,end_epoch)
+        sublistLw = createSublist(df,"loadLw")
+        postDataApi("loadLw_"+dataTagId,sublistLw,start_epoch,end_epoch)
 for unitId in units:
     loadtagsmap,ctags,tags = getData()
     data = {}
@@ -201,41 +235,6 @@ for unitId in units:
             bucketSize = int(loadtagsmap[j]['bucketSize'])
         except:
             get_bucketSize(dfGroup)
+
+        calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup)
         
-        data1 = getValues(url=kairosUrl, tag=dataTagId)
-        data2 = getValues(url=kairosUrl,tag =loadtag)
-        df = data1.merge(data2, on='date', how='left')
-        df = df.drop_duplicates(subset='date')
-        df.fillna(method='ffill',inplace=True)
-        df.reset_index(drop=True, inplace=True)
-        if dataTagId==loadtag:
-            df=df
-        else:
-            df = df[df[loadtag] > 0]
-        df['bucket']=None
-        df['bucket'] = df[loadtag] // bucketSize * bucketSize
-        df = df.dropna()
-        df['loadLw']=None
-        df['loadUp']=None
-        if len(df)==0:
-            continue
-        for i , row in dfGroup.iterrows():
-            #print("in")
-            df.loc[df[df['bucket'] ==row['bucket']].index,"loadUp"] = row['oldUpper']
-            df.loc[df[df['bucket'] ==row['bucket']].index,"loadLw"] = row['oldLower']
-        df.dropna(inplace=True)
-        #print(df)
-        try:
-            start_epoch = df['date'].iloc[0].astype(float)
-            end_epoch = df['date'].iloc[-1].astype(float)
-        except Exception as ex:
-            print(ex)
-            continue
-        #print(type(start_epoch),type(end_epoch))
-        sublistUp = createSublist(df,"loadUp")
-        postDataApi("loadUp_"+dataTagId,sublistUp,start_epoch,end_epoch)
-        sublistLw = createSublist(df,"loadLw")
-        postDataApi("loadLw_"+dataTagId,sublistLw,start_epoch,end_epoch)
-
-
-  
