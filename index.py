@@ -181,13 +181,13 @@ for unitId in units:
     pd.DataFrame(ctags,columns=["dataTagId"]).to_csv(csvName)
     loadtagsmap = mapLtags(ctags,tags)
     print(len(loadtagsmap))
-    print("preparing to calculate and post...........")
+    #print("preparing to calculate and post...........")
     data = {}
-    kairosUrl = base_url.replace("/exactapi", 'api/v1/datapoints/query')
-    #start_epoch = int(datetime(2023,9,5,0,0,0).strftime('%s'))*1000
-    #end_epoch = int(datetime(2023,9,21,15,0,0).strftime('%s'))*1000
+    kairosUrl = base_url.replace("/exactapi", '/api/v1/datapoints/query')
+    print("preparing to calculate and post...........")
     x=1
     for j in ctags:
+        print()
         print(x)
         print(j)
         x+=1
