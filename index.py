@@ -157,7 +157,7 @@ def get_bucketSize(dataframe):
     mode_result = stats.mode(differences)
     return int(mode_result.mode[0])
 
-for unitId in units:
+def getData():
     url = base_url+'/units/'+unitId+'/tagmeta?filter={"fields":["dataTagId","equipmentId"]}'
     print(url)
     response = requests.get(url)
@@ -180,14 +180,16 @@ for unitId in units:
     csvName = units[unitId]+"incidenttags.csv"
     pd.DataFrame(ctags,columns=["dataTagId"]).to_csv(csvName)
     loadtagsmap = mapLtags(ctags,tags)
-    print(len(loadtagsmap))
-    #print("preparing to calculate and post...........")
+    return loadtagsmap,c_tags,tags
+
+
+for unitId in units:
+    loadtagsmap,ctags,tags = getData()
     data = {}
     kairosUrl = base_url.replace("/exactapi", '/api/v1/datapoints/query')
     print("preparing to calculate and post...........")
     x=1
     for j in ctags:
-        print()
         print(x)
         print(j)
         x+=1
@@ -202,21 +204,8 @@ for unitId in units:
         
         data1 = getValues(url=kairosUrl, tag=dataTagId)
         data2 = getValues(url=kairosUrl,tag =loadtag)
-        
-        d = pd.DataFrame(data1)
-        #print(d.isna().sum())
-        d = d.drop_duplicates(subset='date', keep='first')
-        # d = d.set_index('date')
-        d.dropna(axis=0,inplace=True)
-        df = pd.concat([df, d], axis=1)
-        d = pd.DataFrame(data2)
-        #print(d.isna().sum())
-        d.rename(columns={'date': 'date_lt'}, inplace=True)
-        d = d.drop_duplicates(subset='date_lt', keep='first')
-        d.dropna(axis=0,inplace=True)
-        # d = d.set_index('date')
-        df = pd.concat([df, d], axis=1)
-
+        df = data1.merge(data2, on='date', how='left')
+        df = df.drop_duplicates(subset='date')
         df.fillna(method='ffill',inplace=True)
         df.reset_index(drop=True, inplace=True)
         if dataTagId==loadtag:
