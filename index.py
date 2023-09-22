@@ -157,7 +157,7 @@ def get_bucketSize(dataframe):
     mode_result = stats.mode(differences)
     return int(mode_result.mode[0])
 
-def getData():
+def getData(unitId):
     url = base_url+'/units/'+unitId+'/tagmeta?filter={"fields":["dataTagId","equipmentId"]}'
     print(url)
     response = requests.get(url)
@@ -180,9 +180,9 @@ def getData():
     csvName = units[unitId]+"incidenttags.csv"
     pd.DataFrame(ctags,columns=["dataTagId"]).to_csv(csvName)
     loadtagsmap = mapLtags(ctags,tags)
-    return loadtagsmap,ctags,tags
+    return loadtagsmap,ctags
 
-def calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup):
+def calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup,bucketSize):
         data1 = getValues(url=kairosUrl, tag=dataTagId)
         data2 = getValues(url=kairosUrl,tag =loadtag)
         df = data1.merge(data2, on='date', how='left')
@@ -218,9 +218,9 @@ def calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup):
         sublistLw = createSublist(df,"loadLw")
         postDataApi("loadLw_"+dataTagId,sublistLw,start_epoch,end_epoch)
 
-def main()        
+def main():        
     for unitId in units:
-        loadtagsmap,ctags,tags = getData()
+        loadtagsmap,ctags = getData(unitId=)
         data = {}
         kairosUrl = base_url.replace("/exactapi", '/api/v1/datapoints/query')
         print("preparing to calculate and post...........")
@@ -238,7 +238,7 @@ def main()
             except:
                 get_bucketSize(dfGroup)
 
-            calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup)
+            calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup,bucketSize)
 
 main()
         
