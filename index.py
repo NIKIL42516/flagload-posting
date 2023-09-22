@@ -176,8 +176,9 @@ def getData(unitId):
     for i in incidents:
         for ct in i['criticalTags']:
             tags_ct.append(ct['dataTagId'])
-    print(tags_ct)
+    #print(tags_ct)
     ctags = list(set(tags_ct))
+    print(ctags)
     ctags = [i for i in ctags if i in tags]
     csvName = units[unitId]+"incidenttags.csv"
     pd.DataFrame(ctags,columns=["dataTagId"]).to_csv(csvName)
