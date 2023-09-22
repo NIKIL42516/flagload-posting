@@ -217,24 +217,28 @@ def calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup):
         postDataApi("loadUp_"+dataTagId,sublistUp,start_epoch,end_epoch)
         sublistLw = createSublist(df,"loadLw")
         postDataApi("loadLw_"+dataTagId,sublistLw,start_epoch,end_epoch)
-for unitId in units:
-    loadtagsmap,ctags,tags = getData()
-    data = {}
-    kairosUrl = base_url.replace("/exactapi", '/api/v1/datapoints/query')
-    print("preparing to calculate and post...........")
-    x=1
-    for j in ctags:
-        print(x)
-        print(j)
-        x+=1
-        df = pd.DataFrame()
-        dataTagId=j
-        dfGroup = fetch_data(dataTagId,unitId)
-        loadtag=loadtagsmap[j]['loadTag']
-        try:
-            bucketSize = int(loadtagsmap[j]['bucketSize'])
-        except:
-            get_bucketSize(dfGroup)
 
-        calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup)
+def main()        
+    for unitId in units:
+        loadtagsmap,ctags,tags = getData()
+        data = {}
+        kairosUrl = base_url.replace("/exactapi", '/api/v1/datapoints/query')
+        print("preparing to calculate and post...........")
+        x=1
+        for j in ctags:
+            print(x)
+            print(j)
+            x+=1
+            df = pd.DataFrame()
+            dataTagId=j
+            dfGroup = fetch_data(dataTagId,unitId)
+            loadtag=loadtagsmap[j]['loadTag']
+            try:
+                bucketSize = int(loadtagsmap[j]['bucketSize'])
+            except:
+                get_bucketSize(dfGroup)
+
+            calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup)
+
+main()
         
