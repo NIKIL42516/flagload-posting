@@ -171,6 +171,7 @@ def getData(unitId):
     response = requests.get(url)
     print("response " ,response)
     incidents=json.loads(response.content)
+    print(len(incidents))
     tags_ct=[]
     for i in incidents:
         for ct in i['criticalTags']:
