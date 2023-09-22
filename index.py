@@ -220,8 +220,10 @@ def calculateAndPost(kairosUrl,dataTagId,loadtag,dfGroup,bucketSize):
 
 def main():        
     for unitId in units:
+        print(unitId)
         x=1
         loadtagsmap,ctags = getData(unitId)
+        print(loadtagsmap,ctags)
         kairosUrl = base_url.replace("/exactapi", '/api/v1/datapoints/query')
         print("preparing to calculate and post...........")
         for j in ctags:
