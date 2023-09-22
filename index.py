@@ -164,6 +164,7 @@ for unitId in units:
     print("response " ,response)
     tagmeta=json.loads(response.content)
     print(len(tagmeta))
+    print(tagmeta)
     tags = {i['dataTagId']:i['equipmentId'] for i in tagmeta}
     url = base_url+'/units/'+unitId+'/incidents?filter={"where":{"startTime":{"gt":"2023-07-21T00:00:00.000Z"}},"fields":["criticalTags"]}'
     print(url)
